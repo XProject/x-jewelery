@@ -155,7 +155,7 @@ if Config.UseTarget then
         coords = vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z + 1.2),
         size = vector3(1.0, 1.0, 2.4),
         rotation = Config.Electrical.w,
-        debug = true,
+        debug = Config.Debug,
         options = {
             {
                 icon = "fab fa-usb",
@@ -209,7 +209,7 @@ if Config.UseTarget then
             coords = Config.Cabinets[i].coords,
             size = vec3(1.2, 1.6, 1),
             rotation = Config.Cabinets[i].heading,
-            debug = true,
+            debug = Config.Debug,
             options = {
                 {
                     icon = "fas fa-gem",

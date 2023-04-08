@@ -1,5 +1,6 @@
 Config = {}
 
+Config.Debug = true
 Config.Location = {
     Coords = vector3(-622.127, -230.927, 38.1),
     Range = 25.0,
