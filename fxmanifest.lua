@@ -1,5 +1,5 @@
 fx_version  "cerulean"
-use_experimental_fxv2_oal   "yes"
+-- use_experimental_fxv2_oal   "yes"
 lua54       "yes"
 game        "gta5"
 
@@ -14,6 +14,7 @@ files {
 
 shared_scripts {
     "@ox_lib/init.lua",
+    "shared.lua",
     "bridge/**/*shared*.lua",
     "configs/default.lua"
 }
@@ -23,7 +24,7 @@ client_script {
     "client/*.lua"
 }
 
-client_script {
+server_script {
     "bridge/**/*server*.lua",
     "server/*.lua"
 }

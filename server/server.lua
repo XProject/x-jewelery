@@ -4,7 +4,8 @@ local StartedElectrical = {}
 local StartedCabinet = {}
 local AlarmFired = false
 
-lib.callback.register("qb-jewelery:callback:electricalbox", function(source)
+lib.callback.register("qbx-jewelleryrobbery:callback:electricalBox", function(source)
+    print("SERVER IS TRIGGERED")
     local player = Framework.GetPlayerFromSource(source)
     if not player then return false end
 
@@ -144,4 +145,4 @@ AddEventHandler("playerJoining", function(source)
     TriggerClientEvent("qb-jewelery:client:syncconfig", source, Config.Cabinets)
 end)
 
-lib.versionCheck("Qbox-project/qb-jewelery")
+-- lib.versionCheck("Qbox-project/qb-jewelery")

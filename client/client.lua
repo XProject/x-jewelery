@@ -27,59 +27,7 @@ local function DrawText3D(coords, text)
     ClearDrawOrigin()
 end
 
-if Config.UseTarget then
-    exports.ox_target:addBoxZone({
-        coords = vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z + 1.2),
-        size = vector3(1.0, 1.0, 2.4),
-        rotation = Config.Electrical.w,
-        debug = true,
-        options = {
-            {
-                icon = "fab fa-usb",
-                label = locale("text.electrical"),
-                distance = 1.6,
-                items = Config.Doorlock.RequiredItem,
-                onSelect = function()
-                    lib.callback("qb-jewelery:callback:electricalbox", false, function(CanHack)
-                        if not CanHack then return end
-                        TriggerEvent("qb-jewelery:client:electricalHandler")
-                    end)
-                end
-            }
-        }
-    })
-else
-    CreateThread(function()
-        local HasShownText
-        while true do
-            local playerCoords = GetEntityCoords(cache.ped)
-            local ElectricalCoords = vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z + 1.1)
-            local WaitTime = 800
-            local Nearby = false
-            if #(playerCoords - ElectricalCoords) <= 1.5 and not IsHacking then
-                WaitTime = 0
-                Nearby = true
-                if Config.UseDrawText then
-                    if not HasShownText then HasShownText = true lib.showTextUI(locale("text.electrical")) end
-                else
-                    DrawText3D(ElectricalCoords, locale("text.electrical"))
-                end
-                if IsControlJustPressed(0, 38) then
-                    lib.callback("qb-jewelery:callback:electricalbox", false, function(CanHack)
-                        if not CanHack then return end
-
-                        IsHacking = true
-                        TriggerEvent("qb-jewelery:client:electricalHandler")
-                    end)
-                end
-            end
-            if not Nearby and HasShownText then HasShownText = false lib.hideTextUI() end
-            Wait(WaitTime)
-        end
-    end)
-end
-
-AddEventHandler("qb-jewelery:client:electricalHandler", function()
+local function hackElectricalHandler()
     lib.requestAnimDict(BOX_ANIMATION_DICTIONARY)
 
     local playerCoords = GetEntityCoords(cache.ped)
@@ -114,7 +62,7 @@ AddEventHandler("qb-jewelery:client:electricalHandler", function()
         Wait(GetAnimDuration(BOX_ANIMATION_DICTIONARY, "exit") * 1000)
         NetworkStopSynchronisedScene(LeavingScene)
     end)
-end)
+end
 
 local function StartRayFire(Coords, RayFire)
     local RayFireObject = GetRayfireMapObject(Coords.x, Coords.y, Coords.z, 1.4, RayFire)
@@ -135,6 +83,58 @@ local function PlaySmashAudio(Coords)
     local SoundId = GetSoundId()
     PlaySoundFromCoord(SoundId, "Glass_Smash", Coords.x, Coords.y, Coords.z, "", false, 6.0, false)
     ReleaseSoundId(SoundId)
+end
+
+if Config.UseTarget then
+    exports.ox_target:addBoxZone({
+        coords = vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z + 1.2),
+        size = vector3(1.0, 1.0, 2.4),
+        rotation = Config.Electrical.w,
+        debug = true,
+        options = {
+            {
+                icon = "fab fa-usb",
+                label = locale("text.electrical"),
+                distance = 1.6,
+                -- items = Config.Doorlock.RequiredItem,
+                onSelect = function()
+                    local canHack = lib.callback.await("qbx-jewelleryrobbery:callback:electricalBox", 100)
+                    if canHack then
+                        hackElectricalHandler()
+                    end
+                end
+            }
+        }
+    })
+else
+    CreateThread(function()
+        local HasShownText
+        while true do
+            local playerCoords = GetEntityCoords(cache.ped)
+            local ElectricalCoords = vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z + 1.1)
+            local WaitTime = 1000
+            local Nearby = false
+            if #(playerCoords - ElectricalCoords) <= 1.5 and not IsHacking then
+                WaitTime = 0
+                Nearby = true
+                if Config.UseDrawText then
+                    if not HasShownText then HasShownText = true lib.showTextUI(locale("text.electrical")) end
+                else
+                    DrawText3D(ElectricalCoords, locale("text.electrical"))
+                end
+                if IsControlJustPressed(0, 38) then
+                    lib.callback("qbx-jewelleryrobbery:callback:electricalBox", false, function(CanHack)
+                        if not CanHack then return end
+
+                        IsHacking = true
+                        hackElectricalHandler()
+                    end)
+                end
+            end
+            if not Nearby and HasShownText then HasShownText = false lib.hideTextUI() end
+            Wait(WaitTime)
+        end
+    end)
 end
 
 if Config.UseTarget then
@@ -166,7 +166,7 @@ else
         while true do
             local playerCoords = GetEntityCoords(cache.ped)
             local Nearby = false
-            local WaitTime = 800
+            local WaitTime = 1000
             for i = 1, #Config.Cabinets do
                 if #(playerCoords - Config.Cabinets[i].coords) < 0.5 then
                     if not ClosestCabinet then ClosestCabinet = i
