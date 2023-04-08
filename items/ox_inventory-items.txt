@@ -1,0 +1,39 @@
+["10kgoldchain"] = {
+    label = "10k Gold Chain",
+    weight = 2000,
+    stack = true,
+    close = true,
+    description = "10 carat golden chain",
+},
+
+["diamond_ring"] = {
+    label = "Diamond Ring",
+    weight = 1500,
+    stack = true,
+    close = true,
+    description = "A diamond ring seems like the jackpot to me!",
+},
+    
+["electronickit"] = {
+    label = "Electronic Kit",
+    weight = 100,
+    stack = true,
+    close = true,
+    description = "If you've always wanted to build a robot you can maybe start here. Maybe you'll be the new Elon Musk?",
+},
+
+["goldchain"] = {
+    label = "Golden Chain",
+    weight = 1500,
+    stack = true,
+    close = true,
+    description = "A golden chain seems like the jackpot to me!",
+},
+
+["rolex"] = {
+    label = "Golden Watch",
+    weight = 1500,
+    stack = true,
+    close = true,
+    description = "A golden watch seems like the jackpot to me!",
+},
