@@ -18,3 +18,5 @@ function ShowNotification(message, type, source)
 
     return lib.notify(notifyObject)
 end
+
+lib.locale() -- initialise the locale module

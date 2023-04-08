@@ -36,7 +36,7 @@ if Config.UseTarget then
         options = {
             {
                 icon = "fab fa-usb",
-                label = Lang:t("text.electrical"),
+                label = locale("text.electrical"),
                 distance = 1.6,
                 items = Config.Doorlock.RequiredItem,
                 onSelect = function()
@@ -60,9 +60,9 @@ else
                 WaitTime = 0
                 Nearby = true
                 if Config.UseDrawText then
-                    if not HasShownText then HasShownText = true lib.showTextUI(Lang:t("text.electrical")) end
+                    if not HasShownText then HasShownText = true lib.showTextUI(locale("text.electrical")) end
                 else
-                    DrawText3D(ElectricalCoords, Lang:t("text.electrical"))
+                    DrawText3D(ElectricalCoords, locale("text.electrical"))
                 end
                 if IsControlJustPressed(0, 38) then
                     lib.callback("qb-jewelery:callback:electricalbox", false, function(CanHack)
@@ -147,7 +147,7 @@ if Config.UseTarget then
             options = {
                 {
                     icon = "fas fa-gem",
-                    label = Lang:t("text.cabinet"),
+                    label = locale("text.cabinet"),
                     distance = 0.6,
                     onSelect = function()
                         ClosestCabinet = i
@@ -177,9 +177,9 @@ else
             end
             if Nearby and not (IsSmashing or Config.Cabinets[ClosestCabinet].isOpened) then
                 if Config.UseDrawText then
-                    if not HasShownText then HasShownText = true lib.showTextUI(Lang:t("text.cabinet")) end
+                    if not HasShownText then HasShownText = true lib.showTextUI(locale("text.cabinet")) end
                 else
-                    DrawText3D(Config.Cabinets[ClosestCabinet].coords, Lang:t("text.cabinet"))
+                    DrawText3D(Config.Cabinets[ClosestCabinet].coords, locale("text.cabinet"))
                 end
                 if IsControlJustPressed(0, 38) then
                     lib.callback("qb-jewelery:callback:cabinet", false, function(CanSmash)

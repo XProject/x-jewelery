@@ -12,15 +12,15 @@ lib.callback.register("qb-jewelery:callback:electricalbox", function(source)
     if #(playerCoords - vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z)) > 2 then return false end
 
     local playerHasRequiredItem = Framework.DoesPlayerHaveItem(player, Config.Doorlock.RequiredItem, 1)
-    if not playerHasRequiredItem then ShowNotification(Lang:t("notify.noitem", { item = Framework.GetItemLabel(Config.Doorlock.RequiredItem) }), "error", source) return false end
+    if not playerHasRequiredItem then ShowNotification(locale("notify.noitem", Framework.GetItemLabel(Config.Doorlock.RequiredItem)), "error", source) return false end
 
     local copsAmount = Framework.GetOnlineCopsAmount()
     if copsAmount < Config.MinimumCops then
-        if Config.NotEnoughCopsNotify then ShowNotification(Lang:t("notify.nopolice", { Required = Config.MinimumCops }), "error", source) end
+        if Config.NotEnoughCopsNotify then ShowNotification(locale("notify.nopolice", Config.MinimumCops), "error", source) end
         return false
     end
 
-    if ElectricalBusy then ShowNotification(Lang:t("notify.busy"), "inform", source) return false end
+    if ElectricalBusy then ShowNotification(locale("notify.busy"), "inform", source) return false end
 
     ElectricalBusy = true
     StartedElectrical[source] = true
@@ -34,11 +34,11 @@ lib.callback.register("qb-jewelery:callback:cabinet", function(source, closestCa
 
     if #(playerCoords - Config.Cabinets[closestCabinet].coords) > 1.8 then return false end
 
-    if not Config.AllowedWeapons[GetSelectedPedWeapon(playerPed)] then ShowNotification(Lang:t("notify.noweapon"), "inform", source) return false end
+    if not Config.AllowedWeapons[GetSelectedPedWeapon(playerPed)] then ShowNotification(locale("notify.noweapon"), "inform", source) return false end
 
-    if Config.Cabinets[closestCabinet].isBusy then ShowNotification(Lang:t("notify.busy"), "inform", source) return false end
+    if Config.Cabinets[closestCabinet].isBusy then ShowNotification(locale("notify.busy"), "inform", source) return false end
 
-    if Config.Cabinets[closestCabinet].isOpened then ShowNotification(Lang:t("notify.cabinetdone"), "inform", source) return false end
+    if Config.Cabinets[closestCabinet].isOpened then ShowNotification(locale("notify.cabinetdone"), "inform", source) return false end
 
     StartedCabinet[source] = closestCabinet
     Config.Cabinets[closestCabinet].isBusy = true
@@ -59,7 +59,7 @@ local function fireAlarm()
     if AlarmFired then return end
     AlarmFired = true
 
-    TriggerEvent("police:server:policeAlert", Lang:t("notify.police"))
+    TriggerEvent("police:server:policeAlert", locale("notify.police"))
     TriggerEvent("qb-scoreboard:server:SetActivityBusy", "jewellery", true)
     TriggerClientEvent("qb-jewelery:client:alarm", -1)
 

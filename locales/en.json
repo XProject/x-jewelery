@@ -1,0 +1,11 @@
+{
+    "text.electrical": "[E] - Hack Doorlock",
+    "text.cabinet": "[E] - Smash Cabinet",
+
+    "notify.busy": "Someone is already on it",
+    "notify.cabinetdone": "This one is done already",
+    "notify.noweapon": "You don't have a weapon in hand",
+    "notify.noitem": "You don't have an %s with you",
+    "notify.police": "Vangelico Store robbery reported",
+    "notify.nopolice": "Not Enough Police (%s Required)",
+}

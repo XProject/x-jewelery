@@ -1,19 +1,29 @@
-fx_version 'cerulean'
-game 'gta5'
+fx_version  "cerulean"
+use_experimental_fxv2_oal   "yes"
+lua54       "yes"
+game        "gta5"
 
-description 'https://github.com/Qbox-project'
-version '1.0.0'
+name        "x-jewelleryrobbery"
+version     "1.0.0"
+description "Qbox Jewellery Robbery"
+repository  "https://github.com/Qbox-project/qbx-jewelleryrobbery"
 
-shared_scripts {
-    '@ox_lib/init.lua',
-    '@qb-core/shared/locale.lua',
-    'locale/en.lua',
-    'locale/*.lua',
-    'configs/default.lua'
+files {
+    "locales/*.json",
 }
 
-client_script 'client.lua'
+shared_scripts {
+    "@ox_lib/init.lua",
+    "bridge/**/*shared*.lua",
+    "configs/default.lua"
+}
 
-server_script 'server.lua'
+client_script {
+    "bridge/**/*client*.lua",
+    "client/*.lua"
+}
 
-lua54 'yes'
+client_script {
+    "bridge/**/*server*.lua",
+    "server/*.lua"
+}
