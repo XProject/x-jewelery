@@ -5,7 +5,6 @@ local StartedCabinet = {}
 local AlarmFired = false
 
 lib.callback.register("qbx-jewelleryrobbery:callback:electricalBox", function(source)
-    print("SERVER IS TRIGGERED")
     local player = Framework.GetPlayerFromSource(source)
     if not player then return false end
 
@@ -113,7 +112,7 @@ end)
 RegisterNetEvent("qb-jewellery:server:succeshackdoor", function()
     local playerCoords = GetEntityCoords(GetPlayerPed(source))
 
-    if not ElectricalBusy or not not StartedElectrical[source] then return --[[player is sus]] end
+    if not ElectricalBusy or not StartedElectrical[source] then return --[[player is sus]] end
 
     if #(playerCoords - vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z)) > 2 then return end
 

@@ -1,5 +1,5 @@
-local IsHacking
-local IsSmashing
+local isHacking = false
+local isSmashing = false
 local ClosestCabinet = 1
 local BOX_ANIMATION_DICTIONARY = "anim@scripted@player@mission@tun_control_tower@male@"
 local CABINET_ANIMATION_DICTIONARY = "missheist_jewel"
@@ -27,7 +27,34 @@ local function DrawText3D(coords, text)
     ClearDrawOrigin()
 end
 
+local function hack()
+    local p = promise.new()
+    local hackTime = math.random(Config.Doorlock.HackTime.Min, Config.Doorlock.HackTime.Max)
+
+    if GetResourceState("ultra-voltlab"):find("start") then
+        TriggerEvent("ultra-voltlab", hackTime, function(result, reason)
+            p:resolve(result == 1 and true or false)
+        end)
+    elseif GetResourceState("ps-ui"):find("start") then
+        -- exports["ps-ui"]:Maze(function(success)
+        --     p:resolve(success and true or false)
+        -- end, hackTime)
+
+        local types = {"braille", "runes"} -- (alphabet, numeric, alphanumeric, greek, braille, runes)
+        exports["ps-ui"]:Scrambler(function(success)
+            p:resolve(success and true or false)
+        end, types[math.random(#types)], hackTime, 1)
+    else
+        p:resolve(true)
+    end
+
+    return Citizen.Await(p)
+end
+
 local function hackElectricalHandler()
+    if isHacking then return end
+    isHacking = true
+
     lib.requestAnimDict(BOX_ANIMATION_DICTIONARY)
 
     local playerCoords = GetEntityCoords(cache.ped)
@@ -46,22 +73,20 @@ local function hackElectricalHandler()
     Wait(GetAnimDuration(BOX_ANIMATION_DICTIONARY, "enter") * 1000)
     NetworkStartSynchronisedScene(LoopingScene)
 
-    TriggerEvent("ultra-voltlab", math.random(Config.Doorlock.HackTime.Min, Config.Doorlock.HackTime.Max), function(result, reason)
-        Wait(2500)
-        NetworkStartSynchronisedScene(LeavingScene)
-        IsHacking = false
-        if result == 0 then
-            TriggerServerEvent("qb-jewellery:server:failedhackdoor")
-        elseif result == 1 then
-            TriggerServerEvent("qb-jewellery:server:succeshackdoor")
-        elseif result == 2 then
-            ShowNotification("Timed out", "error")
-        elseif result == -1 then
-            print("Error occured", reason)
-        end
-        Wait(GetAnimDuration(BOX_ANIMATION_DICTIONARY, "exit") * 1000)
-        NetworkStopSynchronisedScene(LeavingScene)
-    end)
+    local hackSuccess = hack()
+    if hackSuccess then
+        TriggerServerEvent("qb-jewellery:server:succeshackdoor")
+    else
+        TriggerServerEvent("qb-jewellery:server:failedhackdoor")
+    end
+    print("hackSuccess", hackSuccess)
+
+    Wait(2500)
+    NetworkStartSynchronisedScene(LeavingScene)
+    Wait(GetAnimDuration(BOX_ANIMATION_DICTIONARY, "exit") * 1000)
+    NetworkStopSynchronisedScene(LeavingScene)
+
+    isHacking = false
 end
 
 local function StartRayFire(Coords, RayFire)
@@ -85,119 +110,10 @@ local function PlaySmashAudio(Coords)
     ReleaseSoundId(SoundId)
 end
 
-if Config.UseTarget then
-    exports.ox_target:addBoxZone({
-        coords = vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z + 1.2),
-        size = vector3(1.0, 1.0, 2.4),
-        rotation = Config.Electrical.w,
-        debug = true,
-        options = {
-            {
-                icon = "fab fa-usb",
-                label = locale("text.electrical"),
-                distance = 1.6,
-                -- items = Config.Doorlock.RequiredItem,
-                onSelect = function()
-                    local canHack = lib.callback.await("qbx-jewelleryrobbery:callback:electricalBox", 100)
-                    if canHack then
-                        hackElectricalHandler()
-                    end
-                end
-            }
-        }
-    })
-else
-    CreateThread(function()
-        local HasShownText
-        while true do
-            local playerCoords = GetEntityCoords(cache.ped)
-            local ElectricalCoords = vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z + 1.1)
-            local WaitTime = 1000
-            local Nearby = false
-            if #(playerCoords - ElectricalCoords) <= 1.5 and not IsHacking then
-                WaitTime = 0
-                Nearby = true
-                if Config.UseDrawText then
-                    if not HasShownText then HasShownText = true lib.showTextUI(locale("text.electrical")) end
-                else
-                    DrawText3D(ElectricalCoords, locale("text.electrical"))
-                end
-                if IsControlJustPressed(0, 38) then
-                    lib.callback("qbx-jewelleryrobbery:callback:electricalBox", false, function(CanHack)
-                        if not CanHack then return end
+local function openCabinetHandler()
+    if isSmashing then return end
+    isSmashing = true
 
-                        IsHacking = true
-                        hackElectricalHandler()
-                    end)
-                end
-            end
-            if not Nearby and HasShownText then HasShownText = false lib.hideTextUI() end
-            Wait(WaitTime)
-        end
-    end)
-end
-
-if Config.UseTarget then
-    for i = 1, #Config.Cabinets do
-        exports.ox_target:addBoxZone({
-            coords = Config.Cabinets[i].coords,
-            size = vec3(1.2, 1.6, 1),
-            rotation = Config.Cabinets[i].heading,
-            debug = true,
-            options = {
-                {
-                    icon = "fas fa-gem",
-                    label = locale("text.cabinet"),
-                    distance = 0.6,
-                    onSelect = function()
-                        ClosestCabinet = i
-                        lib.callback("qb-jewelery:callback:cabinet", false, function(CanSmash)
-                            if not CanSmash then return end
-                            TriggerEvent("qb-jewelery:client:cabinetHandler")
-                        end, ClosestCabinet)
-                    end
-                }
-            }
-        })
-    end
-else
-    CreateThread(function()
-        local HasShownText
-        while true do
-            local playerCoords = GetEntityCoords(cache.ped)
-            local Nearby = false
-            local WaitTime = 1000
-            for i = 1, #Config.Cabinets do
-                if #(playerCoords - Config.Cabinets[i].coords) < 0.5 then
-                    if not ClosestCabinet then ClosestCabinet = i
-                    elseif #(playerCoords - Config.Cabinets[i].coords) < #(playerCoords - Config.Cabinets[ClosestCabinet].coords) then ClosestCabinet = i end
-                    WaitTime = 0
-                    Nearby = true
-                end
-            end
-            if Nearby and not (IsSmashing or Config.Cabinets[ClosestCabinet].isOpened) then
-                if Config.UseDrawText then
-                    if not HasShownText then HasShownText = true lib.showTextUI(locale("text.cabinet")) end
-                else
-                    DrawText3D(Config.Cabinets[ClosestCabinet].coords, locale("text.cabinet"))
-                end
-                if IsControlJustPressed(0, 38) then
-                    lib.callback("qb-jewelery:callback:cabinet", false, function(CanSmash)
-                        if not CanSmash then return end
-
-                        IsSmashing = true
-                        if HasShownText then HasShownText = false lib.hideTextUI() end
-                        TriggerEvent("qb-jewelery:client:cabinetHandler")
-                    end, ClosestCabinet)
-                end
-            end
-            if not Nearby and HasShownText then HasShownText = false lib.hideTextUI() end
-            Wait(WaitTime)
-        end
-    end)
-end
-
-AddEventHandler("qb-jewelery:client:cabinetHandler", function()
     local animName
     local playerCoords = GetEntityCoords(cache.ped)
 
@@ -229,9 +145,126 @@ AddEventHandler("qb-jewelery:client:cabinetHandler", function()
     PlaySmashAudio(playerCoords)
     Wait(GetAnimDuration(CABINET_ANIMATION_DICTIONARY, animName) * 850)
     ClearPedTasks(cache.ped)
-    IsSmashing = false
+    
     TriggerServerEvent("qb-jewelery:server:endcabinet")
-end)
+    isSmashing = false
+end
+
+if Config.UseTarget then
+    exports.ox_target:addBoxZone({
+        coords = vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z + 1.2),
+        size = vector3(1.0, 1.0, 2.4),
+        rotation = Config.Electrical.w,
+        debug = true,
+        options = {
+            {
+                icon = "fab fa-usb",
+                label = locale("text.electrical"),
+                distance = 1.6,
+                -- items = Config.Doorlock.RequiredItem,
+                canInteract = function()
+                    return not isHacking
+                end,
+                onSelect = function()
+                    local canHack = lib.callback.await("qbx-jewelleryrobbery:callback:electricalBox", 100)
+                    if canHack then
+                        hackElectricalHandler()
+                    end
+                end
+            }
+        }
+    })
+else
+    CreateThread(function()
+        local HasShownText
+        while true do
+            local playerCoords = GetEntityCoords(cache.ped)
+            local ElectricalCoords = vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z + 1.1)
+            local WaitTime = 1000
+            local Nearby = false
+            if #(playerCoords - ElectricalCoords) <= 1.5 and not isHacking then
+                WaitTime = 0
+                Nearby = true
+                if Config.UseDrawText then
+                    if not HasShownText then HasShownText = true lib.showTextUI(locale("text.electrical")) end
+                else
+                    DrawText3D(ElectricalCoords, locale("text.electrical"))
+                end
+                if IsControlJustPressed(0, 38) then
+                    lib.callback("qbx-jewelleryrobbery:callback:electricalBox", false, function(CanHack)
+                        if not CanHack then return end
+                        hackElectricalHandler()
+                    end)
+                end
+            end
+            if not Nearby and HasShownText then HasShownText = false lib.hideTextUI() end
+            Wait(WaitTime)
+        end
+    end)
+end
+
+if Config.UseTarget then
+    for i = 1, #Config.Cabinets do
+        exports.ox_target:addBoxZone({
+            coords = Config.Cabinets[i].coords,
+            size = vec3(1.2, 1.6, 1),
+            rotation = Config.Cabinets[i].heading,
+            debug = true,
+            options = {
+                {
+                    icon = "fas fa-gem",
+                    label = locale("text.cabinet"),
+                    distance = 0.6,
+                    canInteract = function()
+                        return not isSmashing
+                    end,
+                    onSelect = function()
+                        ClosestCabinet = i
+                        lib.callback("qb-jewelery:callback:cabinet", false, function(CanSmash)
+                            if not CanSmash then return end
+                            openCabinetHandler()
+                        end, ClosestCabinet)
+                    end
+                }
+            }
+        })
+    end
+else
+    CreateThread(function()
+        local HasShownText
+        while true do
+            local playerCoords = GetEntityCoords(cache.ped)
+            local Nearby = false
+            local WaitTime = 1000
+            for i = 1, #Config.Cabinets do
+                if #(playerCoords - Config.Cabinets[i].coords) < 0.5 then
+                    if not ClosestCabinet then ClosestCabinet = i
+                    elseif #(playerCoords - Config.Cabinets[i].coords) < #(playerCoords - Config.Cabinets[ClosestCabinet].coords) then ClosestCabinet = i end
+                    WaitTime = 0
+                    Nearby = true
+                end
+            end
+            if Nearby and not (isSmashing or Config.Cabinets[ClosestCabinet].isOpened) then
+                if Config.UseDrawText then
+                    if not HasShownText then HasShownText = true lib.showTextUI(locale("text.cabinet")) end
+                else
+                    DrawText3D(Config.Cabinets[ClosestCabinet].coords, locale("text.cabinet"))
+                end
+                if IsControlJustPressed(0, 38) then
+                    lib.callback("qb-jewelery:callback:cabinet", false, function(CanSmash)
+                        if not CanSmash then return end
+
+                        if HasShownText then HasShownText = false lib.hideTextUI() end
+
+                        openCabinetHandler()
+                    end, ClosestCabinet)
+                end
+            end
+            if not Nearby and HasShownText then HasShownText = false lib.hideTextUI() end
+            Wait(WaitTime)
+        end
+    end)
+end
 
 RegisterNetEvent("qb-jewelery:client:synceffects", function(ClosestCabinet, OriginalPlayer)
     Wait(1500)
@@ -263,15 +296,32 @@ CreateThread(function()
     while true do
         if #(GetEntityCoords(cache.ped) - Config.Cabinets[1].coords) < 50 then
             for i = 1, #Config.Cabinets do
-                if Config.Cabinets[i].isOpened then
-                    local RayFire = GetRayfireMapObject(Config.Cabinets[i].coords.x, Config.Cabinets[i].coords.y, Config.Cabinets[i].coords.z, 1.4, Config.Cabinets[i].rayFire)
-                    SetStateOfRayfireMapObject(RayFire, 9)
+                local object = GetRayfireMapObject(Config.Cabinets[i].coords.x, Config.Cabinets[i].coords.y, Config.Cabinets[i].coords.z, 1.4, Config.Cabinets[i].rayFire)
+                local objectRayfireState = GetStateOfRayfireMapObject(object) - 1
+                if Config.Cabinets[i].isOpened and objectRayfireState == 2 then
+                    SetStateOfRayfireMapObject(object, 9)
+                elseif not Config.Cabinets[i].isOpened and objectRayfireState == 9 then
+                    SetStateOfRayfireMapObject(object, 2)
                 end
             end
         end
-        Wait(6000)
+        Wait(5000)
     end
 end)
+
+do
+    if Config.Location.Blip.Active then
+        local blipCoords = Config.Location.Coords
+        local blip = AddBlipForCoord(blipCoords.x, blipCoords.y, blipCoords.z)
+        SetBlipSprite(blip, Config.Location.Blip.Type)
+        SetBlipScale(blip, Config.Location.Blip.Size)
+        SetBlipColour(blip, Config.Location.Blip.Color)
+        SetBlipAsShortRange(blip, true)
+        AddTextEntry(Config.Location.Blip.Name, Config.Location.Blip.Name)
+        BeginTextCommandSetBlipName(Config.Location.Blip.Name)
+        EndTextCommandSetBlipName(blip)
+    end
+end
 
 if GetResourceMetadata(GetCurrentResourceName(), "shared_script", GetNumResourceMetadata(GetCurrentResourceName(), "shared_script") - 1) == "configs/kambi.lua" then
     -- Add more functionality later

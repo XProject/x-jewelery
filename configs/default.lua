@@ -1,7 +1,18 @@
 Config = {}
 
+Config.Location = {
+    Coords = vector3(-622.127, -230.927, 38.1),
+    Range = 25.0,
+    Blip = {
+        Active = true,
+        Name = "Vangelico Jewellery",
+        Type = 617,
+        Color = 5,
+        Size = 0.8
+    },
+}
 Config.Timeout = 2700000
-Config.MinimumCops = 2
+Config.MinimumCops = 0
 Config.NotEnoughCopsNotify = true
 Config.Electrical = vector4(-624.295, -215.22, 52.54, 118.0)
 Config.FingerDropChance = 60
@@ -15,7 +26,7 @@ Config.Doorlock = {
         Max = 60
     },
     RequiredItem =  'electronickit',
-    LoseItemOnUse = true,
+    LoseItemOnUse = false,
 }
 
 Config.Reward = {
