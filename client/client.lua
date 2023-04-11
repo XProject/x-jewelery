@@ -88,11 +88,11 @@ local function hackElectricalHandler()
 end
 
 local function startHackingElectricalHandler()
-    local canHack = lib.callback.await("qbx-jewelleryrobbery:callback:canHackElectricalBox", 1000)
-
-    if canHack then
-        hackElectricalHandler()
-    end
+    lib.callback("qbx-jewelleryrobbery:callback:canHackElectricalBox", 1000, function(canHack)
+        if canHack then
+            hackElectricalHandler()
+        end
+    end)
 end
 
 local function startRayFire(coords, rayFire)
@@ -157,11 +157,11 @@ local function openCabinetHandler()
 end
 
 local function startSmashingCabinet(cabinetId)
-    local canSmash = lib.callback.await("qbx-jewelleryrobbery:callback:canSmashCabinet", 1000, cabinetId)
-
-    if canSmash then
-        openCabinetHandler()
-    end
+    lib.callback("qbx-jewelleryrobbery:callback:canSmashCabinet", 1000, function(canSmash)
+        if canSmash then
+            openCabinetHandler()
+        end
+    end, cabinetId)
 end
 
 if Config.UseTarget then
