@@ -57,7 +57,7 @@ local function hackElectricalHandler()
 
     lib.requestAnimDict(BOX_ANIMATION_DICTIONARY)
 
-    local playerCoords = cache.coords
+    local playerCoords = GetEntityCoords(cache.ped)
     local boxObject = GetClosestObjectOfType(playerCoords.x, playerCoords.y, playerCoords.z, 1.5, `tr_prop_tr_elecbox_01a`, false, false, false)
 
     local enteringScene = NetworkCreateSynchronisedScene(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z, 0, 0, Config.Electrical.w, 2, true, false, 1065353216, -1, 1.0)
@@ -193,7 +193,7 @@ else
         local electricalHandlerCoords = vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z + 1.1)
 
         while true do
-            playerCoords = cache.coords
+            playerCoords = GetEntityCoords(cache.ped)
             isNearbyElectricalHandler = false
 
             if #(playerCoords - electricalHandlerCoords) <= 1.5 and not isHacking then
@@ -250,7 +250,7 @@ else
         local isNearbyAnyCabinet
 
         while true do
-            playerCoords = cache.coords
+            playerCoords = GetEntityCoords(cache.ped)
             isNearbyAnyCabinet = false
 
             for i = 1, #Config.Cabinets do
@@ -317,7 +317,7 @@ end)
 
 CreateThread(function()
     while true do
-        if #(cache.coords - Config.Location.Coords) <= Config.Location.Range then
+        if #(GetEntityCoords(cache.ped) - Config.Location.Coords) <= Config.Location.Range then
             for i = 1, #Config.Cabinets do
                 local object = GetRayfireMapObject(Config.Cabinets[i].coords.x, Config.Cabinets[i].coords.y, Config.Cabinets[i].coords.z, 1.4, Config.Cabinets[i].rayFire)
                 local objectRayfireState = GetStateOfRayfireMapObject(object) - 1
