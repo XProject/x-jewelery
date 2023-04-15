@@ -197,10 +197,10 @@ else
                 isNearbyElectricalHandler = true
 
                 if not Config.UseDrawText and not isTextShown then
-                    lib.showTextUI(locale("text.electrical"))
+                    lib.showTextUI(("[E] - %s"):format(locale("text.electrical")))
                     isTextShown = true
                 else
-                    DrawText3D(electricalHandlerCoords, locale("text.electrical"))
+                    DrawText3D(electricalHandlerCoords, ("[E] - %s"):format(locale("text.electrical")))
                 end
 
                 if IsControlJustReleased(0, 38) then
@@ -265,10 +265,10 @@ else
 
             if isNearbyAnyCabinet and not (isSmashing or Config.Cabinets[closestCabinet].isOpened) then
                 if not Config.UseDrawText and not isTextShown then
-                    lib.showTextUI(locale("text.cabinet"))
+                    lib.showTextUI(("[E] - %s"):format(locale("text.cabinet")))
                     isTextShown = true
                 else
-                    DrawText3D(Config.Cabinets[closestCabinet].coords, locale("text.cabinet"))
+                    DrawText3D(Config.Cabinets[closestCabinet].coords, ("[E] - %s"):format(locale("text.cabinet")))
                 end
                 if IsControlJustReleased(0, 38) then
                     if isTextShown then lib.hideTextUI() isTextShown = false end

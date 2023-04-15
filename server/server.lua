@@ -43,11 +43,11 @@ lib.callback.register("qbx-jewelleryrobbery:callback:canHackElectricalBox", func
     if #(playerCoords - vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z)) > 2 then return false end
 
     local playerHasRequiredItem = Framework.DoesPlayerHaveItem(player, Config.Doorlock.RequiredItem, 1)
-    if not playerHasRequiredItem then Shared.showNotification(locale("notify.noitem", Framework.GetItemLabel(Config.Doorlock.RequiredItem)), "error", source) return false end
+    if not playerHasRequiredItem then Shared.showNotification(locale("notify.noItem", Framework.GetItemLabel(Config.Doorlock.RequiredItem)), "error", source) return false end
 
     local copsAmount = Framework.GetOnlineCopsAmount()
     if copsAmount < Config.MinimumCops then
-        if Config.NotEnoughCopsNotify then Shared.showNotification(locale("notify.nopolice", Config.MinimumCops), "error", source) end
+        if Config.NotEnoughCopsNotify then Shared.showNotification(locale("notify.noPolice", Config.MinimumCops), "error", source) end
         return false
     end
 
@@ -55,6 +55,8 @@ lib.callback.register("qbx-jewelleryrobbery:callback:canHackElectricalBox", func
 
     isElectricalBoxBusy = true
     StartedElectrical[source] = true
+
+    Framework.AlertPolice(locale("notify.suspiciousActivity"))
 
     return Config.Doorlock.LoseItemOnUse and Framework.RemoveItemFromPlayer(player, Config.Doorlock.RequiredItem, 1) or true
 end)
@@ -65,11 +67,11 @@ lib.callback.register("qbx-jewelleryrobbery:callback:canSmashCabinet", function(
 
     if #(playerCoords - Config.Cabinets[cabinetId].coords) > 1.8 then return false end
 
-    if not Config.AllowedWeapons[GetSelectedPedWeapon(playerPed)] then Shared.showNotification(locale("notify.noweapon"), "inform", source) return false end
+    if not Config.AllowedWeapons[GetSelectedPedWeapon(playerPed)] then Shared.showNotification(locale("notify.noWeapon"), "inform", source) return false end
 
     if Config.Cabinets[cabinetId].isBusy then Shared.showNotification(locale("notify.busy"), "inform", source) return false end
 
-    if Config.Cabinets[cabinetId].isOpened then Shared.showNotification(locale("notify.cabinetdone"), "inform", source) return false end
+    if Config.Cabinets[cabinetId].isOpened then Shared.showNotification(locale("notify.cabinetDone"), "inform", source) return false end
 
     StartedCabinet[source] = cabinetId
     Config.Cabinets[cabinetId].isBusy = true
