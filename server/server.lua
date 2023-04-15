@@ -61,15 +61,16 @@ local function fireAlarm()
     if isAlarmFired then return end
     isAlarmFired = true
 
-    TriggerEvent("police:server:policeAlert", locale("notify.police"))
-    TriggerEvent("qb-scoreboard:server:SetActivityBusy", "jewellery", true)
+    Framework.AlertPolice(locale("notify.police"))
+    Framework.SetScoreboardActivityBusy(true)
+
     TriggerClientEvent("qbx-jewelleryrobbery:client:alarm", -1)
 
     SetTimeout(Config.Timeout, function()
         local entranceDoor = exports.ox_doorlock:getDoorFromName(Config.Doorlock.Name)
         TriggerEvent("ox_doorlock:setState", entranceDoor?.id, 1)
 
-        TriggerEvent("qb-scoreboard:server:SetActivityBusy", "jewellery", false)
+        Framework.SetScoreboardActivityBusy(false)
 
         for i = 1, #Config.Cabinets do
             Config.Cabinets[i].isOpened = false
