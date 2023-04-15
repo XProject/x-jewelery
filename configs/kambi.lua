@@ -1,6 +1,18 @@
 Config = {}
 
-Config.Timeout = 2700000
+Config.Debug = false
+Config.Location = {
+    Coords = vector3(0.0, 0.0, 0.0),
+    Range = 25.0,
+    Blip = {
+        Active = true,
+        Name = "Vangelico Jewellery",
+        Type = 617,
+        Color = 5,
+        Size = 0.8
+    },
+}
+Config.Timeout =  45 * 60 -- 45 minutes(2700 seconds)
 Config.MinimumCops = 2
 Config.NotEnoughCopsNotify = true
 Config.Electrical = vector4(-462.06, -64.46, 49.0, 131)

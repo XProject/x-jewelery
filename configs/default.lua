@@ -12,7 +12,7 @@ Config.Location = {
         Size = 0.8
     },
 }
-Config.Timeout = 2700000
+Config.Timeout = 45 * 60 -- 45 minutes(2700 seconds)
 Config.MinimumCops = 0
 Config.NotEnoughCopsNotify = true
 Config.Electrical = vector4(-624.295, -215.22, 52.54, 118.0)
