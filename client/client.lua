@@ -310,9 +310,10 @@ end)
 
 RegisterNetEvent("qbx-jewelleryrobbery:client:alarm", function()
     if GetInvokingResource() then return end
-    
+
     PrepareAlarm("JEWEL_STORE_HEIST_ALARMS")
     Wait(100)
+    StopAlarm("JEWEL_STORE_HEIST_ALARMS", true) -- stop previous alarm
     StartAlarm("JEWEL_STORE_HEIST_ALARMS", false)
     Wait(Config.AlarmDuration)
     StopAlarm("JEWEL_STORE_HEIST_ALARMS", true)
