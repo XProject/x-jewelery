@@ -146,9 +146,6 @@ local function openCabinetHandler()
         end
     end
 
-    loadParticle()
-    StartNetworkedParticleFxNonLoopedOnEntity("scr_jewel_cab_smash", GetCurrentPedWeaponEntityIndex(cache.ped), 0, 0, 0, 0, 0, 0, 1.6, false, false, false)
-    playSmashingSoundAtCoords(playerCoords)
     Wait(GetAnimDuration(CABINET_ANIMATION_DICTIONARY, animName) * 850)
     ClearPedTasks(cache.ped)
 
@@ -287,9 +284,11 @@ else
     end)
 end
 
-RegisterNetEvent("qbx-jewelleryrobbery:client:syncEffects", function(cabinetId, OriginalPlayer)
+RegisterNetEvent("qbx-jewelleryrobbery:client:syncEffects", function(cabinetId, originalPlayerSource)
+    if GetInvokingResource() then return end
+
     Wait(1500)
-    
+
     if Config.Cabinets[cabinetId].rayFire == "DES_Jewel_Cab4" then
         Wait(150)
         startRayFire(Config.Cabinets[cabinetId].coords, Config.Cabinets[cabinetId].rayFire)
@@ -299,15 +298,19 @@ RegisterNetEvent("qbx-jewelleryrobbery:client:syncEffects", function(cabinetId, 
     end
 
     loadParticle()
-    StartNetworkedParticleFxNonLoopedOnEntity("scr_jewel_cab_smash", GetCurrentPedWeaponEntityIndex(GetPlayerPed(GetPlayerFromServerId(OriginalPlayer))), 0, 0, 0, 0, 0, 0, 1.6, false, false, false)
+    StartNetworkedParticleFxNonLoopedOnEntity("scr_jewel_cab_smash", GetCurrentPedWeaponEntityIndex(GetPlayerPed(GetPlayerFromServerId(originalPlayerSource))), 0, 0, 0, 0, 0, 0, 1.6, false, false, false)
     playSmashingSoundAtCoords(Config.Cabinets[cabinetId].coords)
 end)
 
-RegisterNetEvent("qbx-jewelleryrobbery:client:syncConfig", function(Cabinets)
-    Config.Cabinets = Cabinets
+RegisterNetEvent("qbx-jewelleryrobbery:client:syncConfig", function(cabinetsConfig)
+    if GetInvokingResource() then return end
+
+    Config.Cabinets = cabinetsConfig
 end)
 
 RegisterNetEvent("qbx-jewelleryrobbery:client:alarm", function()
+    if GetInvokingResource() then return end
+    
     PrepareAlarm("JEWEL_STORE_HEIST_ALARMS")
     Wait(100)
     StartAlarm("JEWEL_STORE_HEIST_ALARMS", false)

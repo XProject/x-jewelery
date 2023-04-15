@@ -44,12 +44,13 @@ lib.callback.register("qbx-jewelleryrobbery:callback:canSmashCabinet", function(
     StartedCabinet[source] = closestCabinet
     Config.Cabinets[closestCabinet].isBusy = true
 
-    local allPlayers = Framework.GetAllPlayers()
-    for k in pairs(allPlayers) do
-        if k ~= source then
-            if #(GetEntityCoords(GetPlayerPed(k)) - Config.Cabinets[closestCabinet].coords) < 20 then
-                TriggerClientEvent("qbx-jewelleryrobbery:client:syncEffects", k, closestCabinet, source)
-            end
+    local allPlayers = GetPlayers()
+    for i = 1, #allPlayers do
+        local playerSource = allPlayers[i] --[[@as number]]
+        local distanceWithCabinet = #(GetEntityCoords(GetPlayerPed(playerSource)) - Config.Cabinets[closestCabinet].coords)
+
+        if distanceWithCabinet < 20 then
+            TriggerClientEvent("qbx-jewelleryrobbery:client:syncEffects", playerSource, closestCabinet, source)
         end
     end
 

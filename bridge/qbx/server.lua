@@ -34,7 +34,3 @@ end
 function Framework.GetItemLabel(itemName)
     return exports["ox_inventory"]:Items(itemName)?.label
 end
-
-function Framework.GetAllPlayers()
-    return Framework.Object.Functions.GetQBPlayers()
-end
