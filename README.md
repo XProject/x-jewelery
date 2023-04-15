@@ -1,21 +1,13 @@
-# qb-jewelery
-Jewelry Robbery For QB-Core
+# qbx-jewelleryrobbery
+Multi-Framework Jewellery Robbery For FiveM
+
 
 ## Dependencies
-- [qb-core](https://github.com/QBCore-Remastered/qb-core) (Required)
-- [ox_target](https://github.com/overextended/ox_target) (Required)
+- [qb-core](https://github.com/QBCore-Remastered/qb-core) or [es_extended](https://github.com/esx-framework/esx_core) (Required)
 - [ox_lib](https://github.com/overextended/ox_lib) (Required)
+- [ox_target](https://github.com/overextended/ox_target) (optional)
 
-# Server.cfg Convar Update
-- Global DrawTextUi Option
-```
-setr UseTarget false
-```
 
-- Global Target Option
-```
-setr UseTarget true
-```
 # DrawTextUi Previews
 ![preview](https://i.imgur.com/VLbhNpB.jpeg)
 

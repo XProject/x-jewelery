@@ -35,6 +35,10 @@ function Framework.GetItemLabel(itemName)
     return exports["ox_inventory"]:Items(itemName)?.label
 end
 
-function Framework.GetAllPlayers()
-    return Framework.Object.Functions.GetQBPlayers()
+function Framework.AlertPolice(message)
+    TriggerEvent("police:server:policeAlert", message)
+end
+
+function Framework.SetScoreboardActivityBusy(state)
+    TriggerEvent("qb-scoreboard:server:SetActivityBusy", "jewellery", state)
 end

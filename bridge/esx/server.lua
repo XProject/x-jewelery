@@ -35,6 +35,10 @@ function Framework.GetItemLabel(itemName)
     return exports["ox_inventory"]:Items(itemName)?.label
 end
 
-function Framework.GetAllPlayers()
-    return Framework.Object.GetExtendedPlayers()
+function Framework.AlertPolice(message)
+    -- implement your own logic since esx doesn't offer that by default
+end
+
+function Framework.SetScoreboardActivityBusy(state)
+    -- implement your own logic since esx doesn't offer that by default
 end
