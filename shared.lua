@@ -1,9 +1,13 @@
-local isServer = IsDuplicityVersion()
+Shared = {}
+
+Shared.isServer = IsDuplicityVersion()
+
+Shared.currentResourceName = GetCurrentResourceName()
 
 ---@param message string
 ---@param type string
 ---@param source integer | nil
-function ShowNotification(message, type, source)
+function Shared.showNotification(message, type, source)
     local notifyObject = {
         title = "Jewellery",
         description = message,
@@ -19,4 +23,4 @@ function ShowNotification(message, type, source)
     return lib.notify(notifyObject)
 end
 
-lib.locale() -- initialise the locale module
+lib.locale() -- initialise the ox_lib's locale module

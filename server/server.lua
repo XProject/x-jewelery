@@ -1,8 +1,9 @@
-local ElectricalBoxEntity
-local ElectricalBusy
-local StartedElectrical = {}
-local StartedCabinet = {}
-local AlarmFired = false
+local electricalBoxEntity, isElectricalBoxBusy , isAlarmFired = nil, false, false
+local StartedElectrical, StartedCabinet = {}, {}
+
+local function syncConfig(source)
+    TriggerClientEvent("qbx-jewelleryrobbery:client:syncConfig", source or -1, Config.Cabinets)
+end
 
 lib.callback.register("qbx-jewelleryrobbery:callback:canHackElectricalBox", function(source)
     local player = Framework.GetPlayerFromSource(source)
@@ -12,17 +13,17 @@ lib.callback.register("qbx-jewelleryrobbery:callback:canHackElectricalBox", func
     if #(playerCoords - vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z)) > 2 then return false end
 
     local playerHasRequiredItem = Framework.DoesPlayerHaveItem(player, Config.Doorlock.RequiredItem, 1)
-    if not playerHasRequiredItem then ShowNotification(locale("notify.noitem", Framework.GetItemLabel(Config.Doorlock.RequiredItem)), "error", source) return false end
+    if not playerHasRequiredItem then Shared.showNotification(locale("notify.noitem", Framework.GetItemLabel(Config.Doorlock.RequiredItem)), "error", source) return false end
 
     local copsAmount = Framework.GetOnlineCopsAmount()
     if copsAmount < Config.MinimumCops then
-        if Config.NotEnoughCopsNotify then ShowNotification(locale("notify.nopolice", Config.MinimumCops), "error", source) end
+        if Config.NotEnoughCopsNotify then Shared.showNotification(locale("notify.nopolice", Config.MinimumCops), "error", source) end
         return false
     end
 
-    if ElectricalBusy then ShowNotification(locale("notify.busy"), "inform", source) return false end
+    if isElectricalBoxBusy then Shared.showNotification(locale("notify.busy"), "inform", source) return false end
 
-    ElectricalBusy = true
+    isElectricalBoxBusy = true
     StartedElectrical[source] = true
 
     return Config.Doorlock.LoseItemOnUse and Framework.RemoveItemFromPlayer(player, Config.Doorlock.RequiredItem, 1) or true
@@ -34,11 +35,11 @@ lib.callback.register("qbx-jewelleryrobbery:callback:canSmashCabinet", function(
 
     if #(playerCoords - Config.Cabinets[closestCabinet].coords) > 1.8 then return false end
 
-    if not Config.AllowedWeapons[GetSelectedPedWeapon(playerPed)] then ShowNotification(locale("notify.noweapon"), "inform", source) return false end
+    if not Config.AllowedWeapons[GetSelectedPedWeapon(playerPed)] then Shared.showNotification(locale("notify.noweapon"), "inform", source) return false end
 
-    if Config.Cabinets[closestCabinet].isBusy then ShowNotification(locale("notify.busy"), "inform", source) return false end
+    if Config.Cabinets[closestCabinet].isBusy then Shared.showNotification(locale("notify.busy"), "inform", source) return false end
 
-    if Config.Cabinets[closestCabinet].isOpened then ShowNotification(locale("notify.cabinetdone"), "inform", source) return false end
+    if Config.Cabinets[closestCabinet].isOpened then Shared.showNotification(locale("notify.cabinetdone"), "inform", source) return false end
 
     StartedCabinet[source] = closestCabinet
     Config.Cabinets[closestCabinet].isBusy = true
@@ -56,8 +57,8 @@ lib.callback.register("qbx-jewelleryrobbery:callback:canSmashCabinet", function(
 end)
 
 local function fireAlarm()
-    if AlarmFired then return end
-    AlarmFired = true
+    if isAlarmFired then return end
+    isAlarmFired = true
 
     TriggerEvent("police:server:policeAlert", locale("notify.police"))
     TriggerEvent("qb-scoreboard:server:SetActivityBusy", "jewellery", true)
@@ -72,9 +73,9 @@ local function fireAlarm()
         for i = 1, #Config.Cabinets do
             Config.Cabinets[i].isOpened = false
         end
-        TriggerClientEvent("qbx-jewelleryrobbery:client:syncConfig", -1, Config.Cabinets)
+        syncConfig()
 
-        AlarmFired = false
+        isAlarmFired = false
     end)
 end
 
@@ -92,7 +93,7 @@ RegisterNetEvent("qbx-jewelleryrobbery:server:endCabinet", function()
     cabinet.isBusy = false --[[thanks to lua's pass by reference]]
     StartedCabinet[source] = nil
 
-    TriggerClientEvent("qbx-jewelleryrobbery:client:syncConfig", -1, Config.Cabinets)
+    syncConfig()
 
     for _ = 1, math.random(Config.Reward.MinAmount, Config.Reward.MaxAmount) do
         local randomItem = Config.Reward.Items[math.random(1, #Config.Reward.Items)]
@@ -108,42 +109,52 @@ RegisterNetEvent("qbx-jewelleryrobbery:server:electricalHandlerHack", function(h
     if hackSuccess then
         local playerCoords = GetEntityCoords(GetPlayerPed(source))
 
-        if not ElectricalBusy or not StartedElectrical[source] then return --[[player is sus]] end
+        if not isElectricalBoxBusy or not StartedElectrical[source] then return --[[player is sus]] end
 
         if #(playerCoords - vector3(Config.Electrical.x, Config.Electrical.y, Config.Electrical.z)) > 2 then return end
 
-        ElectricalBusy = false
+        isElectricalBoxBusy = false
         StartedElectrical[source] = false
 
-        ShowNotification("Hack successful", "success", source)
+        Shared.showNotification("Hack successful", "success", source)
 
         local entranceDoor = exports.ox_doorlock:getDoorFromName(Config.Doorlock.Name)
         TriggerEvent("ox_doorlock:setState", entranceDoor?.id, 0)
     else
-        ElectricalBusy = false
+        isElectricalBoxBusy = false
         StartedElectrical[source] = false
 
-        ShowNotification("Hack failed", "error", source)
+        Shared.showNotification("Hack failed", "error", source)
     end
 end)
 
-AddEventHandler("onResourceStop", function(resource)
-    if resource ~= GetCurrentResourceName() then return end
-    if not DoesEntityExist(ElectricalBoxEntity) then return end
-    DeleteEntity(ElectricalBoxEntity)
-end)
+local function onResourceStart(resource)
+    if resource ~= Shared.currentResourceName then return end
 
-CreateThread(function()
-    Wait(250)
-    ElectricalBoxEntity = CreateObject(`tr_prop_tr_elecbox_01a`, Config.Electrical.x, Config.Electrical.y, Config.Electrical.z, true, false, false)
-    while ElectricalBoxEntity == 0 do ElectricalBoxEntity = CreateObject(`tr_prop_tr_elecbox_01a`, Config.Electrical.x, Config.Electrical.y, Config.Electrical.z, true, false, false) Wait(3000) end -- WTH ?!
-    while not DoesEntityExist(ElectricalBoxEntity) do Wait(0) end
-    Wait(100)
-    SetEntityHeading(ElectricalBoxEntity, Config.Electrical.w)
-end)
+    syncConfig()
+
+    electricalBoxEntity = CreateObject(`tr_prop_tr_elecbox_01a`, Config.Electrical.x, Config.Electrical.y, Config.Electrical.z, true, false, false)
+
+    while not DoesEntityExist(electricalBoxEntity) do Wait(0) end
+
+    SetEntityHeading(electricalBoxEntity, Config.Electrical.w)
+end
+
+AddEventHandler("onServerResourceStart", onResourceStart)
+
+local function onResourceStop(resource)
+    if resource ~= Shared.currentResourceName then return end
+
+    if DoesEntityExist(electricalBoxEntity) then
+        DeleteEntity(electricalBoxEntity)
+    end
+end
+
+AddEventHandler("onResourceStop", onResourceStop)
+AddEventHandler("onServerResourceStop", onResourceStop)
 
 AddEventHandler("playerJoining", function(source)
-    TriggerClientEvent("qbx-jewelleryrobbery:client:syncConfig", source, Config.Cabinets)
+    syncConfig(source)
 end)
 
 -- lib.versionCheck("Qbox-project/qb-jewelery")
